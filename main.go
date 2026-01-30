@@ -4,12 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
 type Day struct {
 	Date  string
-	Total string
+	Total int
 }
 
 func main() {
@@ -23,6 +24,7 @@ func main() {
 
 	var days []Day
 	var currentDate string
+	totalAllDays := 0
 
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
@@ -31,19 +33,24 @@ func main() {
 			continue
 		}
 
-		// дата вида 08.01
 		if isDate(line) {
 			currentDate = line
 			continue
 		}
 
-		// итог вида "== 1940"
 		if strings.HasPrefix(line, "==") && currentDate != "" {
-			total := strings.TrimSpace(strings.TrimPrefix(line, "=="))
+			raw := strings.TrimSpace(strings.TrimPrefix(line, "=="))
+			dayTotal, err := strconv.Atoi(raw)
+			if err != nil {
+				continue
+			}
+
 			days = append(days, Day{
 				Date:  currentDate,
-				Total: total,
+				Total: dayTotal,
 			})
+
+			totalAllDays += dayTotal
 		}
 	}
 
@@ -51,16 +58,14 @@ func main() {
 		panic(err)
 	}
 
-	// вывод
 	for _, day := range days {
-		fmt.Printf("%s = %s\n", day.Date, day.Total)
+		fmt.Printf("%s = %d\n", day.Date, day.Total)
 	}
+
+	fmt.Println("----------------")
+	fmt.Printf("Итого: %d ккал\n", totalAllDays)
 }
 
 func isDate(s string) bool {
-	// формат XX.XX
-	if len(s) != 5 {
-		return false
-	}
-	return s[2] == '.'
+	return len(s) == 5 && s[2] == '.'
 }
