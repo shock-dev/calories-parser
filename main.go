@@ -17,8 +17,7 @@ type Day struct {
 }
 
 func main() {
-	n := flag.Int("n", 0, "norm calories per day")
-	d := flag.Int("d", 0, "deficit calories per day (info only)")
+	n := flag.Int("n", 0, "daily norm calories")
 	flag.Parse()
 
 	file, err := os.Open("calories.txt")
@@ -28,7 +27,6 @@ func main() {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-
 	var days []Day
 	var currentDate string
 	sumActual := 0
@@ -38,19 +36,16 @@ func main() {
 		if line == "" {
 			continue
 		}
-
 		if isDate(line) {
 			currentDate = line
 			continue
 		}
-
 		if strings.HasPrefix(line, "==") && currentDate != "" {
 			raw := strings.TrimSpace(strings.TrimPrefix(line, "=="))
 			dayTotal, err := strconv.Atoi(raw)
 			if err != nil {
 				continue
 			}
-
 			days = append(days, Day{currentDate, dayTotal})
 			sumActual += dayTotal
 		}
@@ -71,15 +66,9 @@ func main() {
 	sumNorm := (*n) * daysCount
 	burned := sumNorm - sumActual
 
-	fmt.Printf("n: %d ккал\n", *n)
-	if *d != 0 {
-		fmt.Printf("d: %d ккал\n", *d)
-	}
-	fmt.Println()
-
+	fmt.Printf("n: %d ккал\n\n", *n)
 	fmt.Printf("Норма за период: %d ккал\n", sumNorm)
 	fmt.Printf("У меня:          %d ккал\n\n", sumActual)
-
 	fmt.Printf("Сожжено: %d ккал\n", burned)
 	fmt.Printf("≈ %.2f кг\n", float64(burned)/kcalPerKg)
 }
