@@ -2,11 +2,14 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 )
+
+const kcalPerKg = 7700.0
 
 type Day struct {
 	Date  string
@@ -14,6 +17,10 @@ type Day struct {
 }
 
 func main() {
+	n := flag.Int("n", 0, "norm calories per day")
+	d := flag.Int("d", 0, "deficit calories per day (info only)")
+	flag.Parse()
+
 	file, err := os.Open("calories.txt")
 	if err != nil {
 		panic(err)
@@ -24,11 +31,10 @@ func main() {
 
 	var days []Day
 	var currentDate string
-	totalAllDays := 0
+	sumActual := 0
 
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
-
 		if line == "" {
 			continue
 		}
@@ -45,17 +51,9 @@ func main() {
 				continue
 			}
 
-			days = append(days, Day{
-				Date:  currentDate,
-				Total: dayTotal,
-			})
-
-			totalAllDays += dayTotal
+			days = append(days, Day{currentDate, dayTotal})
+			sumActual += dayTotal
 		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		panic(err)
 	}
 
 	for _, day := range days {
@@ -63,7 +61,27 @@ func main() {
 	}
 
 	fmt.Println("----------------")
-	fmt.Printf("Итого: %d ккал\n", totalAllDays)
+
+	if *n == 0 {
+		fmt.Printf("Итого: %d ккал\n", sumActual)
+		return
+	}
+
+	daysCount := len(days)
+	sumNorm := (*n) * daysCount
+	burned := sumNorm - sumActual
+
+	fmt.Printf("n: %d ккал\n", *n)
+	if *d != 0 {
+		fmt.Printf("d: %d ккал\n", *d)
+	}
+	fmt.Println()
+
+	fmt.Printf("Норма за период: %d ккал\n", sumNorm)
+	fmt.Printf("У меня:          %d ккал\n\n", sumActual)
+
+	fmt.Printf("Сожжено: %d ккал\n", burned)
+	fmt.Printf("≈ %.2f кг\n", float64(burned)/kcalPerKg)
 }
 
 func isDate(s string) bool {
