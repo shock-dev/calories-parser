@@ -57,12 +57,15 @@ func main() {
 
 	fmt.Println("----------------")
 
+	daysCount := len(days)
+	avg := float64(sumActual) / float64(daysCount)
+
 	if *n == 0 {
 		fmt.Printf("Итого: %d ккал\n", sumActual)
+		fmt.Printf("Среднее: %.0f ккал/день\n", avg)
 		return
 	}
 
-	daysCount := len(days)
 	sumNorm := (*n) * daysCount
 	burned := sumNorm - sumActual
 
@@ -71,6 +74,7 @@ func main() {
 	fmt.Printf("У меня:          %d ккал\n\n", sumActual)
 	fmt.Printf("Сожжено: %d ккал\n", burned)
 	fmt.Printf("≈ %.2f кг\n", float64(burned)/kcalPerKg)
+	fmt.Printf("Среднее потребление: %.0f ккал/день\n", avg)
 }
 
 func isDate(s string) bool {
